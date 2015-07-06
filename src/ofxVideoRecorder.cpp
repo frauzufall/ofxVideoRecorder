@@ -84,7 +84,8 @@ void ofxVideoDataWriterThread::threadedFunction(){
             delete frame;
         }
         else{
-            condition.wait(conditionMutex);
+            std::unique_lock<std::mutex> lk(conditionMutex);
+            condition.wait(lk);
         }
     }
 
@@ -92,7 +93,7 @@ void ofxVideoDataWriterThread::threadedFunction(){
 }
 
 void ofxVideoDataWriterThread::signal(){
-    condition.signal();
+    condition.notify_one();
 }
 
 //===============================
@@ -134,14 +135,15 @@ void ofxAudioDataWriterThread::threadedFunction(){
             delete frame;
         }
         else{
-            condition.wait(conditionMutex);
+            std::unique_lock<std::mutex> lk(conditionMutex);
+            condition.wait(lk);
         }
     }
 
     ::close(fd);
 }
 void ofxAudioDataWriterThread::signal(){
-    condition.signal();
+    condition.notify_one();
 }
 
 //===============================
@@ -171,7 +173,7 @@ bool ofxVideoRecorder::setup(string fname, int w, int h, float fps, int sampleRa
     stringstream outputSettings;
     outputSettings
     << " -vcodec " << videoCodec
-    << " -b " << videoBitrate
+    << " -b:v " << videoBitrate
     << " -acodec " << audioCodec
     << " -ab " << audioBitrate
     << " " << absFilePath;

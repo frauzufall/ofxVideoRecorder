@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include <set>
+#include <condition_variable>
 
 template <typename T>
 struct lockFreeQueue {
@@ -61,8 +62,8 @@ public:
     bool isWriting() { return bIsWriting; }
     void close() { bClose = true; stopThread(); signal(); }
 private:
-    ofMutex conditionMutex;
-    Poco::Condition condition;
+    std::mutex conditionMutex;
+    std::condition_variable condition;
 //    ofFile * writer;
     string filePath;
     int fd;
@@ -82,7 +83,7 @@ public:
     void close() { bClose = true; stopThread(); signal();  }
 private:
     ofMutex conditionMutex;
-    Poco::Condition condition;
+    std::condition_variable condition;
 //    ofFile * writer;
     string filePath;
     int fd;
